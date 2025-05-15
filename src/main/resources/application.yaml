@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: bs-spring-boot
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
