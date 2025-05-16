@@ -1,0 +1,28 @@
+GET http://localhost:8080/api/v1/customers
+
+###
+GET http://localhost:8080/api/v1/customers/1
+
+###
+POST http://localhost:8080/api/v1/customers
+Content-Type: application/json
+
+{
+  "firstName": "Test",
+  "lastName": "Test",
+  "email": "test@dev.com"
+}
+
+###
+PATCH http://localhost:8080/api/v1/customers/1
+Content-Type: application/json
+
+{
+  "email": "test1@dev.com"
+}
+
+###
+DELETE http://localhost:8080/api/v1/customers/1
+
+
+

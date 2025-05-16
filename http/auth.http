@@ -1,0 +1,43 @@
+### Register a new user
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "user1",
+  "password": "password123",
+  "email": "user1@example.com"
+}
+
+### Login with the registered user
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "user1",
+  "password": "password123"
+}
+
+### Register an admin user (requires ADMIN role)
+POST http://localhost:8080/api/auth/admin/register
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "username": "admin1",
+  "password": "adminpass123",
+  "email": "admin1@example.com",
+  "role": "ADMIN"
+}
+
+### Access public endpoint (no authentication required)
+GET http://localhost:8080/api/public
+
+### Access protected endpoint (requires authentication)
+GET http://localhost:8080/api/protected
+Authorization: Bearer {{auth_token}}
+
+### Access admin endpoint (requires ADMIN role)
+GET http://localhost:8080/api/admin
+Authorization: Bearer {{auth_token}}
+
+
