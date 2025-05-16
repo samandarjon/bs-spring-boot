@@ -3,6 +3,13 @@ spring:
     name: bs-spring-boot
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
   security:
     oauth2:
       client:
