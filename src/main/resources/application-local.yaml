@@ -1,0 +1,10 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+jwt:
+  secret: test
+  expiration: 86400000
+server:
+  port: 8080

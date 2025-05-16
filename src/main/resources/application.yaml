@@ -1,10 +1,8 @@
 spring:
   application:
     name: bs-spring-boot
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
   security:
     oauth2:
       client:
@@ -21,12 +19,5 @@ spring:
             scope:
               - user:email
               - read:user
-
-# JWT Configuration
-jwt:
-  secret: ${JWT_SECRET:5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437}
-  expiration: 86400 # 24 hours in seconds
-
-# Server configuration
 server:
   port: 8080
