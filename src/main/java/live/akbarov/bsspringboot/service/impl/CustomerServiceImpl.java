@@ -1,5 +1,7 @@
 package live.akbarov.bsspringboot.service.impl;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+import live.akbarov.bsspringboot.actuator.metrics.CustomerMetrics;
 import live.akbarov.bsspringboot.dto.CustomerDTO;
 import live.akbarov.bsspringboot.exception.GeneralException;
 import live.akbarov.bsspringboot.exception.NotFoundException;
@@ -18,42 +20,67 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
+    private final CustomerMetrics customerMetrics;
 
     @Override
+    @WithSpan("getCustomers")
     public Page<CustomerDTO> getCustomers(Pageable pageable) {
         return customerRepository.findAll(pageable).map(CustomerMapper.INSTANCE::toCustomerDTO);
     }
 
     @Override
+    @WithSpan("getCustomer")
     public CustomerDTO getCustomer(Long id) {
         return customerRepository.findById(id).map(CustomerMapper.INSTANCE::toCustomerDTO)
                 .orElseThrow(() -> NotFoundException.create("Customer with id " + id + " not found"));
     }
 
     @Override
+    @WithSpan("createCustomer")
     public CustomerDTO createCustomer(CustomerDTO.CreateCustomerDTO customerDTO) {
-        ValidationUtil.onCondition(customerRepository.existsByEmail(customerDTO.getEmail()),
-                "Email is already exist");
-        return Optional.of(customerDTO)
-                .map(CustomerMapper::toCustomerEntity)
-                .map(customerRepository::save)
-                .map(CustomerMapper.INSTANCE::toCustomerDTO)
-                .orElseThrow(() -> GeneralException.create("Customer can not be null"));
+        return customerMetrics.timeOperation(() -> {
+            ValidationUtil.onCondition(customerRepository.existsByEmail(customerDTO.getEmail()),
+                    "Email is already exist");
+            CustomerDTO result = Optional.of(customerDTO)
+                    .map(CustomerMapper::toCustomerEntity)
+                    .map(customerRepository::save)
+                    .map(CustomerMapper.INSTANCE::toCustomerDTO)
+                    .orElseThrow(() -> GeneralException.create("Customer can not be null"));
+
+            // Increment the counter for customer creation
+            customerMetrics.incrementCustomerCreated();
+
+            return result;
+        });
     }
 
     @Override
+    @WithSpan("updateCustomer")
     public CustomerDTO updateCustomer(Long id, CustomerDTO.UpdateCustomerDTO customerDTO) {
-        ValidationUtil.onCondition(customerRepository.existsByEmailAndIdNot(customerDTO.getEmail(), id),
-                "Email is already exist");
-        return customerRepository.findById(id)
-                .map(entity -> CustomerMapper.toUpdatedCustomerDTO(entity, customerDTO))
-                .map(customerRepository::save)
-                .map(CustomerMapper.INSTANCE::toCustomerDTO)
-                .orElseThrow(() -> NotFoundException.create("Customer with id " + id + " not found"));
+        return customerMetrics.timeOperation(() -> {
+            ValidationUtil.onCondition(customerRepository.existsByEmailAndIdNot(customerDTO.getEmail(), id),
+                    "Email is already exist");
+            CustomerDTO result = customerRepository.findById(id)
+                    .map(entity -> CustomerMapper.toUpdatedCustomerDTO(entity, customerDTO))
+                    .map(customerRepository::save)
+                    .map(CustomerMapper.INSTANCE::toCustomerDTO)
+                    .orElseThrow(() -> NotFoundException.create("Customer with id " + id + " not found"));
+
+            // Increment the counter for customer updates
+            customerMetrics.incrementCustomerUpdated();
+
+            return result;
+        });
     }
 
     @Override
+    @WithSpan("deleteCustomer")
     public void deleteCustomer(Long id) {
-        customerRepository.deleteById(id);
+        customerMetrics.timeOperation(() -> {
+            customerRepository.deleteById(id);
+
+            // Increment the counter for customer deletions
+            customerMetrics.incrementCustomerDeleted();
+        });
     }
 }

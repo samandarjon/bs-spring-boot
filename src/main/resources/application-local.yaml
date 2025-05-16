@@ -1,5 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydatabase
+    username: myuser
+    password: secret
+    driver-class-name: org.postgresql.Driver
 jwt:
-  secret: test
+  secret: testerterter64356%%%$#^^&&FHGFD%^TUTGUJHYT
   expiration: 86400000
 server:
   port: 8080
